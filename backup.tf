@@ -9,8 +9,14 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
+
+resource "random_string" "random" {
+  length = 8
+  special = false
+}
+
 resource "aws_backup_vault" "backup_vault" {
-  name = "backup_vault"
+  name = "backup_vault_${random_string.random.result}"
 }
 
 /*
@@ -248,15 +254,4 @@ resource "aws_lambda_permission" "daily_tagging" {
   function_name = aws_lambda_function.backup_auto_tagging.function_name
   principal = "events.amazonaws.com"
   source_arn = aws_cloudwatch_event_rule.daily_tagging.arn
-}
-
-/*
- These outputs are used as inputs for our apex function.
-*/
-output "lambda_backup_auto_tagging" {
-  value = aws_lambda_function.backup_auto_tagging.arn
-}
-
-output "lambda_role_backup_auto_tagging" {
-  value = aws_iam_role.iam_role_lambda_backup_auto_tagging.arn
 }
