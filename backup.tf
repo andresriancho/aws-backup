@@ -9,14 +9,8 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
-
-resource "random_string" "random" {
-  length = 8
-  special = false
-}
-
 resource "aws_backup_vault" "backup_vault" {
-  name = "backup_vault_${random_string.random.result}"
+  name = "backup_vault"
 }
 
 /*
