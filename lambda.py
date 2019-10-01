@@ -7,7 +7,7 @@ from time import gmtime, strftime
 
 import boto3
 
-REGION = 'us-east-1'
+DEFAULT_REGION = 'us-east-1'
 
 BACKUP_TAG_NAME = 'backup_policy'
 BACKUP_DEFAULT_VALUE = 'daily_two_weeks'
@@ -33,6 +33,13 @@ def log(message):
     print('[%s] %s' % (timestamp, message))
 
 
+def get_all_regions():
+    client = boto3.client('ec2', DEFAULT_REGION)
+
+    for region in client.describe_regions()['Regions']:
+        yield region['RegionName']
+
+
 def send_email(subject, message):
     subject_message = ('Subject: %s\n'
                        '\n'
@@ -51,8 +58,8 @@ def send_email(subject, message):
         server.sendmail(MAIL_FROM, MAIL_TO, subject_message)
 
 
-def tag_rds():
-    rds_client = boto3.client('rds', region_name=REGION)
+def tag_rds(region):
+    rds_client = boto3.client('rds', region_name=region)
 
     instances = rds_client.describe_db_instances()
 
@@ -71,13 +78,13 @@ def tag_rds():
         #
         rds_client.add_tags_to_resource(
             ResourceName=db_arn,
-            Tags=[BACKUP_TAG,]
+            Tags=[BACKUP_TAG, ]
         )
         notify_missing_tag(db_arn)
 
 
-def tag_ebs():
-    ec2_client = boto3.client('ec2', region_name=REGION)
+def tag_ebs(region):
+    ec2_client = boto3.client('ec2', region_name=region)
 
     volumes = ec2_client.describe_volumes()
 
@@ -97,13 +104,13 @@ def tag_ebs():
         #
         ec2_client.create_tags(
             Resources=[volume_id],
-            Tags=[BACKUP_TAG,]
+            Tags=[BACKUP_TAG, ]
         )
         notify_missing_tag(volume_id)
 
 
-def tag_efs():
-    efs_client = boto3.client('efs')
+def tag_efs(region):
+    efs_client = boto3.client('efs', region_name=region)
 
     file_systems = efs_client.describe_file_systems()
 
@@ -123,13 +130,13 @@ def tag_efs():
         #
         efs_client.create_tags(
             FileSystemId=file_system_id,
-            Tags=[BACKUP_TAG,]
+            Tags=[BACKUP_TAG, ]
         )
         notify_missing_tag(file_system_id)
 
 
-def tag_dynamodb():
-    dynamodb_client = boto3.client('dynamodb')
+def tag_dynamodb(region):
+    dynamodb_client = boto3.client('dynamodb', region_name=region)
 
     tables = dynamodb_client.list_tables()
 
@@ -149,7 +156,7 @@ def tag_dynamodb():
         #
         dynamodb_client.tag_resource(
             ResourceArn=table_arn,
-            Tags=[BACKUP_TAG,]
+            Tags=[BACKUP_TAG, ]
         )
         notify_missing_tag(table_arn)
 
@@ -198,19 +205,20 @@ def handle(event, context):
     success = True
 
     for tag_function in TAG_FUNCTIONS:
-        try:
-            tag_function()
-        except Exception as e:
-            # Send error message to log
-            args = (tag_function.__name__, e)
-            log('%s raised an exception: %s' % args)
+        for region in get_all_regions():
+            try:
+                tag_function(region)
+            except Exception as e:
+                # Send error message to log
+                args = (tag_function.__name__, e)
+                log('%s raised an exception: %s' % args)
 
-            # Detailed traceback to log
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            traceback.print_tb(exc_traceback, file=sys.stdout)
-            
-            # Store failure and continue with the next function
-            success = False
+                # Detailed traceback to log
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                traceback.print_tb(exc_traceback, file=sys.stdout)
+
+                # Store failure and continue with the next function
+                success = False
 
     log('End backup_auto_tagging')
     return success

@@ -180,6 +180,7 @@ resource "aws_iam_role_policy" "iam_policy_lambda_backup_auto_tagging" {
                  "elasticfilesystem:DescribeTags",
                  "elasticfilesystem:CreateTags",
                  "ec2:DescribeVolumes",
+                 "ec2:DescribeRegions",
                  "ec2:CreateTags",
                  "ec2:DescribeTags"],
       "Resource": "*"
