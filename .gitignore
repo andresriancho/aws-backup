@@ -108,3 +108,4 @@ venv.bak/
 
 backup_auto_tagging.zip
 terraform.tfstate
+vault-access-policy.json
