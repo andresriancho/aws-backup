@@ -1,4 +1,3 @@
-import os
 import sys
 import ssl
 import smtplib
@@ -24,8 +23,8 @@ SMTP_SECURE = True
 SMTP_USER_SECRET_NAME = 'ses/smtp_user'
 SMTP_PASS_SECRET_NAME = 'ses/smtp_pass'
 
-MAIL_TO = 'ops-team@intraway.com'
-MAIL_FROM = 'ops-team@intraway.com'
+MAIL_TO = 'ops-team@example.com'
+MAIL_FROM = 'ops-team@example.com'
 MAIL_SUBJECT_FMT = 'Default backup policy set for ARN %s'
 
 
@@ -42,8 +41,8 @@ def send_email(subject, message):
     subject_message %= (subject, message)
 
     secrets_client = boto3.client('secretsmanager')
-    smtp_user = secrets_client.get_secret_value(SecretId='ses/smtp_user')['SecretString']
-    smtp_pass = secrets_client.get_secret_value(SecretId='ses/smtp_pass')['SecretString']
+    smtp_user = secrets_client.get_secret_value(SecretId=SMTP_USER_SECRET_NAME)['SecretString']
+    smtp_pass = secrets_client.get_secret_value(SecretId=SMTP_PASS_SECRET_NAME)['SecretString']
 
     context = ssl.create_default_context()
     
@@ -162,7 +161,13 @@ def notify_missing_tag(arn):
                '\n'
                'Please review if the default backup policy is adequate for this resource.'
                ' Apply any changes using terraform configuration files by adding tags to'
-               ' the newly created resource.')
+               ' the newly created resource.\n'
+               '\n'
+               'The list of potential backup plans to use for this resource can be'
+               'retrieved using:\n'
+               '\n'
+               'aws backup list-backup-plans | jq ".BackupPlansList[] | .BackupPlanName"\n'
+               '\n')
     args = (arn, BACKUP_TAG_NAME, BACKUP_TAG_NAME, BACKUP_DEFAULT_VALUE)
     log(message % args)
     
@@ -176,6 +181,7 @@ TAG_FUNCTIONS = {
     tag_efs,
     tag_dynamodb
 }
+
 
 def handle(event, context):
     """

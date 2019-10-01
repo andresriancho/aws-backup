@@ -1,7 +1,7 @@
 /*
 
  Backup strategy for multiple resource types, including RDS and DynamoDB,
- usign AWS Backup
+ usign AWS Backup.
 
  See: README.md in this directory for a summary on how this works
 
@@ -55,7 +55,7 @@ resource "local_file" "vault_access_policy" {
 
 resource "null_resource" "put-backup-vault-access-policy" {
   triggers = {
-    policy = "${local_file.vault_access_policy.content}"
+    policy = local_file.vault_access_policy.content
   }
 
   provisioner "local-exec" {
@@ -67,7 +67,9 @@ resource "null_resource" "put-backup-vault-access-policy" {
 
 /*
  Define the backup plans:
+
     * How often are backups created?
+    
     * For how many days are we storing the backups?
 
  Also define tags for selecting which resources are applied to each
@@ -77,7 +79,7 @@ resource "aws_backup_plan" "daily_two_weeks" {
   name = "daily_two_weeks"
   rule {
     rule_name = "daily_two_weeks"
-    target_vault_name = "${aws_backup_vault.backup_vault.name}"
+    target_vault_name = aws_backup_vault.backup_vault.name
 
     # every day at 3am
     schedule = "cron(0 3 * * ? *)"
@@ -89,7 +91,7 @@ resource "aws_backup_plan" "daily_two_weeks" {
 }
 
 resource "aws_backup_selection" "daily_two_weeks_selection" {
-  plan_id = "${aws_backup_plan.daily_two_weeks.id}"
+  plan_id = aws_backup_plan.daily_two_weeks.id
   name = "daily_two_weeks_selection"
   iam_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/service-role/AWSBackupDefaultServiceRole"
 
@@ -104,7 +106,7 @@ resource "aws_backup_plan" "three_times_a_day_two_weeks" {
   name = "three_times_a_day_two_weeks"
   rule {
     rule_name = "three_times_a_day_two_weeks"
-    target_vault_name = "${aws_backup_vault.backup_vault.name}"
+    target_vault_name = aws_backup_vault.backup_vault.name
 
     # every day at 0:00, 8:00 and 16:00
     schedule = "cron(0 0/8 * * ? *)"
@@ -116,7 +118,7 @@ resource "aws_backup_plan" "three_times_a_day_two_weeks" {
 }
 
 resource "aws_backup_selection" "three_times_a_day_two_weeks_selection" {
-  plan_id = "${aws_backup_plan.three_times_a_day_two_weeks.id}"
+  plan_id = aws_backup_plan.three_times_a_day_two_weeks.id
   name = "three_times_a_day_two_weeks_selection"
   iam_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/service-role/AWSBackupDefaultServiceRole"
 
@@ -159,7 +161,7 @@ EOF
 
 resource "aws_iam_role_policy" "iam_policy_lambda_backup_auto_tagging" {
   name = "iam_policy_lambda_backup_auto_tagging"
-  role = "${aws_iam_role.iam_role_lambda_backup_auto_tagging.id}"
+  role = aws_iam_role.iam_role_lambda_backup_auto_tagging.id
 
   policy = <<EOF
 {
@@ -211,9 +213,9 @@ EOF
 resource "aws_lambda_function" "backup_auto_tagging" {
   filename = "lambda_functions/backup_auto_tagging.zip"
   function_name = "backup_auto_tagging"
-  role = "${aws_iam_role.iam_role_lambda_backup_auto_tagging.arn}"
+  role = aws_iam_role.iam_role_lambda_backup_auto_tagging.arn
   handler = "lambda.handler"
-  source_code_hash = "${filebase64sha256("lambda_functions/backup_auto_tagging.zip")}"
+  source_code_hash = filebase64sha256("lambda_functions/backup_auto_tagging.zip")
   runtime = "python3.6"
 
   /*
@@ -239,25 +241,25 @@ resource "aws_cloudwatch_event_rule" "daily_tagging" {
 }
 
 resource "aws_cloudwatch_event_target" "daily_tagging" {
-  rule = "${aws_cloudwatch_event_rule.daily_tagging.name}"
-  arn = "${aws_lambda_function.backup_auto_tagging.arn}"
+  rule = aws_cloudwatch_event_rule.daily_tagging.name
+  arn = aws_lambda_function.backup_auto_tagging.arn
 }
 
 resource "aws_lambda_permission" "daily_tagging" {
   statement_id = "AllowExecutionFromCloudWatchDailyTagging"
   action = "lambda:InvokeFunction"
-  function_name = "${aws_lambda_function.backup_auto_tagging.function_name}"
+  function_name = aws_lambda_function.backup_auto_tagging.function_name
   principal = "events.amazonaws.com"
-  source_arn = "${aws_cloudwatch_event_rule.daily_tagging.arn}"
+  source_arn = aws_cloudwatch_event_rule.daily_tagging.arn
 }
 
 /*
  These outputs are used as inputs for our apex function.
 */
 output "lambda_backup_auto_tagging" {
-  value = "${aws_lambda_function.backup_auto_tagging.arn}"
+  value = aws_lambda_function.backup_auto_tagging.arn
 }
 
 output "lambda_role_backup_auto_tagging" {
-  value = "${aws_iam_role.iam_role_lambda_backup_auto_tagging.arn}"
+  value = aws_iam_role.iam_role_lambda_backup_auto_tagging.arn
 }
