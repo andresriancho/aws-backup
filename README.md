@@ -59,14 +59,15 @@ The `aws_backup_selection` resource is used to match the resources for the
 
 ## Installation
 
-After customization:
+After customization, configure your credentials in `~/.aws/credentials` and use
+the following commands to plan and apply:
 
 ```
 cd aws-backup/ 
 
 terraform init
-terraform plan
-terraform apply
+terraform plan -var profile=awsbackup
+terraform apply -var profile=awsbackup
 ```
 
 Manually tag all resources in your infrastructure using a tag named `backup_policy`

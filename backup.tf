@@ -210,28 +210,25 @@ resource "aws_iam_role_policy" "iam_policy_lambda_backup_auto_tagging" {
 EOF
 }
 
-resource "aws_lambda_function" "backup_auto_tagging" {
-  filename = "lambda_functions/backup_auto_tagging.zip"
-  function_name = "backup_auto_tagging"
-  role = aws_iam_role.iam_role_lambda_backup_auto_tagging.arn
-  handler = "lambda.handler"
-  source_code_hash = filebase64sha256("lambda_functions/backup_auto_tagging.zip")
-  runtime = "python3.6"
+data "archive_file" "backup_auto_tagging_zip" {
+  type        = "zip"
+  output_path = "backup_auto_tagging.zip"
 
-  /*
-  The actual deployment for this lambda function is made using apex. Without
-  this `ignore_changes` the apex deploys will be overwritten by terraform on
-  the next `apply`
-  */
-  lifecycle {
-    ignore_changes = [
-        "handler",
-        "last_modified",
-        "source_code_hash",
-        "timeout",
-        "environment",
-    ]
+  source {
+    content  = "1"
+    filename = "lambda.py"
   }
+}
+
+resource "aws_lambda_function" "backup_auto_tagging" {
+  function_name = "backup_auto_tagging"
+  runtime = "python3.6"
+  handler = "lambda.handler"
+
+  role = aws_iam_role.iam_role_lambda_backup_auto_tagging.arn
+
+  filename = data.archive_file.backup_auto_tagging_zip.output_path
+  source_code_hash = data.archive_file.backup_auto_tagging_zip.output_base64sha256
 }
 
 resource "aws_cloudwatch_event_rule" "daily_tagging" {
