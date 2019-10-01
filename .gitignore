@@ -105,3 +105,6 @@ venv.bak/
 
 .terraform/
 .idea/
+
+backup_auto_tagging.zip
+terraform.tfstate
