@@ -29,7 +29,7 @@ MAIL_SUBJECT_FMT = 'Default backup policy set for ARN %s'
 
 
 def log(message):
-    timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+    timestamp = strftime('%Y-%m-%d %H:%M:%S', gmtime())
     print('[%s] %s' % (timestamp, message))
 
 
@@ -194,7 +194,7 @@ def handle(event, context):
     This tag is used in backup.tf to select which resources to backup using
     AWS Backup.
     """
-    log("Start backup_auto_tagging")
+    log('Start backup_auto_tagging')
     success = True
 
     for tag_function in TAG_FUNCTIONS:
@@ -203,7 +203,7 @@ def handle(event, context):
         except Exception as e:
             # Send error message to log
             args = (tag_function.__name__, e)
-            log("%s raised an exception: %s" % args)
+            log('%s raised an exception: %s' % args)
 
             # Detailed traceback to log
             exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -212,5 +212,5 @@ def handle(event, context):
             # Store failure and continue with the next function
             success = False
 
-    log("End backup_auto_tagging")
+    log('End backup_auto_tagging')
     return success
