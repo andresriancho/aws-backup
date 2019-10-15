@@ -5,19 +5,19 @@ security and operational best practices.
 ## Workflow
 
  * [AWS Backup](https://aws.amazon.com/backup/) selects resources to backup
-   and backup plans based on resource tags.
+   using resource tags. The resource tags determine the backup plan to use.
    
  * A lambda function identifies resources without the `backup_policy` tag,
-   auto-tags those resources with the most basic backup plan and notifies
+   auto-tags those resources with the default backup plan and notifies
    the operations team.
 
  * Backups are performed using the [AWS Backup](https://aws.amazon.com/backup/) service.
-   All backups are stored in a backup vault named `backup_vault` (production account).
+   All backups are stored in a backup vault named `backup_vault`.
    
 ## Customization
 
 Review the `backup.tf` file and customize the `aws_backup_plan` resources
-to match your company policy. This is a resource definition from the latest
+to match your company policies. This is a resource definition from the latest
 implementation:
 
 ```
@@ -38,7 +38,7 @@ resource "aws_backup_plan" "daily_two_weeks" {
 ```
 
 Customize the name (`daily_two_weeks`), `schedule` and `lifecycle` to match
-your company needs. Then create a selector similar to:
+your company requirements. Then create a selector similar to the following:
 
 ```
 resource "aws_backup_selection" "daily_two_weeks_selection" {
@@ -55,12 +55,13 @@ resource "aws_backup_selection" "daily_two_weeks_selection" {
 ```
 
 The `aws_backup_selection` resource is used to match the resources for the
-`aws_backup_plan`.
+`aws_backup_plan`. In this case the resources with `backup_policy` tag with
+value `daily_two_weeks` are selected and associated with the `plan_id`. 
 
 ## Installation
 
 After customization, configure your credentials in `~/.aws/credentials` and use
-the following commands to plan and apply:
+the following commands to deploy:
 
 ```
 cd aws-backup/ 
@@ -73,12 +74,13 @@ terraform apply -var profile=awsbackup
 Manually tag all resources in your infrastructure using a tag named `backup_policy`
 containing one of `aws_backup_plan` as values. Any resources that AWS backup can
 manage and were not manually tagged will be notified by the lambda function to
-the ops team.
+the operations team.
 
 ## Disabling backup
 
 It is possible to disable backups for a specific resource using the tag `backup_policy`
-with value `none`.
+with value `none`. This will prevent AWS Backup from running backups on the resource
+and the Lambda function from sending notifications.
 
 ## Auto-tagging resources
 
