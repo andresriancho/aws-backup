@@ -13,7 +13,20 @@ security and operational best practices.
 
  * Backups are performed using the [AWS Backup](https://aws.amazon.com/backup/) service.
    All backups are stored in a backup vault named `backup_vault`.
-   
+
+## Security
+
+This terraform config adds extra security to the AWS backup vault setup by applying a
+resource policy that prevents any user from:
+ 
+ * Removing the recovery points
+ * Removing the backup vault
+ * Changing or removing the resource policy which imposes the previous restrictions
+
+This means that [only the root account](https://docs.aws.amazon.com/en_pv/general/latest/gr/root-vs-iam.html)
+will ever be able to remove this backup vault! The backup vault will survive even
+in a scenario where a privileged IAM principal with `*:*` permissions is compromised.
+
 ## Customization
 
 Review the `backup.tf` file and customize the `aws_backup_plan` resources
