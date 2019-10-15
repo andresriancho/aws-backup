@@ -1,6 +1,12 @@
 # AWS Backup
-This is an AWS Backup implementation using Terraform implemented to follow
-security and operational best practices.
+This is an AWS Backup implementation using Terraform with security and operational
+best practices in mind.
+
+The following services are supported:
+ * RDS
+ * EBS
+ * EBS
+ * DynamoDB
 
 ## Workflow
 
@@ -27,7 +33,7 @@ This means that [only the root account](https://docs.aws.amazon.com/en_pv/genera
 will ever be able to remove this backup vault! The backup vault will survive even
 in a scenario where a privileged IAM principal with `*:*` permissions is compromised.
 
-## Customization
+## Backup plan customization
 
 Review the `backup.tf` file and customize the `aws_backup_plan` resources
 to match your company policies. This is a resource definition from the latest
@@ -70,6 +76,16 @@ resource "aws_backup_selection" "daily_two_weeks_selection" {
 The `aws_backup_selection` resource is used to match the resources for the
 `aws_backup_plan`. In this case the resources with `backup_policy` tag with
 value `daily_two_weeks` are selected and associated with the `plan_id`. 
+
+## Customize notification emails
+
+Edit the `variables.tf` configuration to define the `to` and `from` email
+addresses to use by the Lambda function to send notifications.
+
+The `from` email address will require you to perform an [SES verification](https://docs.aws.amazon.com/en_pv/ses/latest/DeveloperGuide/verify-email-addresses.html).
+In other words, after applying these terraform configs you will have to go
+to the email inbox for the `from` email address and click on a verification link
+that will allow the Lambda function to send emails from this address.  
 
 ## Installation
 

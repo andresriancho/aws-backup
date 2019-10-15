@@ -47,3 +47,12 @@ resource "aws_secretsmanager_secret_version" "ses_smtp_pass" {
   secret_id     = aws_secretsmanager_secret.ses_smtp_pass.id
   secret_string = aws_iam_access_key.aws_backup_ses_email.ses_smtp_password
 }
+
+/*
+  In order to send emails from SES we need to verify the identity.
+
+  https://docs.aws.amazon.com/en_pv/ses/latest/DeveloperGuide/verify-email-addresses.html
+*/
+resource "aws_ses_email_identity" "mail_from" {
+  email = var.mail_from
+}

@@ -1,3 +1,4 @@
+import os
 import sys
 import ssl
 import smtplib
@@ -6,6 +7,7 @@ import traceback
 from time import gmtime, strftime
 
 import boto3
+import botocore
 
 DEFAULT_REGION = 'us-east-1'
 
@@ -23,8 +25,8 @@ SMTP_SECURE = True
 SMTP_USER_SECRET_NAME = 'ses/smtp_user'
 SMTP_PASS_SECRET_NAME = 'ses/smtp_pass'
 
-MAIL_TO = 'ops-team@example.com'
-MAIL_FROM = 'ops-team@example.com'
+MAIL_TO = os.environ.get('MAIL_TO') or 'ops-team@example.com'
+MAIL_FROM = os.environ.get('MAIL_FROM') or 'ops-team@example.com'
 MAIL_SUBJECT_FMT = 'Default backup policy set for ARN %s'
 
 
@@ -208,6 +210,17 @@ def handle(event, context):
         for region in get_all_regions():
             try:
                 tag_function(region)
+            except botocore.exceptions.EndpointConnectionError as e:
+                #
+                # This is most likely because one of the regions returned by
+                # get_all_regions() does not support the service we want to
+                # query.
+                #
+                # Got this with tag_efs() and sa-east-1
+                #
+                args = (region, tag_function.__name__)
+                log('%s does not support %s' % args)
+                continue
             except Exception as e:
                 # Send error message to log
                 args = (tag_function.__name__, e)
