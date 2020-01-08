@@ -98,8 +98,8 @@ the following commands to deploy:
 cd aws-backup/ 
 
 terraform init
-terraform plan -var profile=awsbackup
-terraform apply -var profile=awsbackup
+terraform plan -var profile=awsbackup -var region=us-east-1
+terraform apply -var profile=awsbackup -var region=us-east-1
 ```
 
 Manually tag all resources in your infrastructure using a tag named `backup_policy`
