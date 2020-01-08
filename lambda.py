@@ -12,7 +12,7 @@ import botocore
 DEFAULT_REGION = 'us-east-1'
 
 BACKUP_TAG_NAME = 'backup_policy'
-BACKUP_DEFAULT_VALUE = 'daily_two_weeks'
+BACKUP_DEFAULT_VALUE = 'grandfather-father-son'
 BACKUP_TAG = {
     'Key': BACKUP_TAG_NAME,
     'Value': BACKUP_DEFAULT_VALUE

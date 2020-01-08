@@ -35,9 +35,8 @@ in a scenario where a privileged IAM principal with `*:*` permissions is comprom
 
 ## Backup plan customization
 
-Review the `backup.tf` file and customize the `aws_backup_plan` resources
-to match your company policies. This is a resource definition from the latest
-implementation:
+Review the `backup-plan.tf` file and customize the `aws_backup_plan` resources
+to match your company policies. This is an example resource definition:
 
 ```
 resource "aws_backup_plan" "daily_two_weeks" {
@@ -56,8 +55,8 @@ resource "aws_backup_plan" "daily_two_weeks" {
 }
 ```
 
-Customize the name (`daily_two_weeks`), `schedule` and `lifecycle` to match
-your company requirements. Then create a selector similar to the following:
+Customize the `name`, `schedule` and `lifecycle` to match your company requirements.
+Then create a selector similar to the following:
 
 ```
 resource "aws_backup_selection" "daily_two_weeks_selection" {
@@ -76,6 +75,9 @@ resource "aws_backup_selection" "daily_two_weeks_selection" {
 The `aws_backup_selection` resource is used to match the resources for the
 `aws_backup_plan`. In this case the resources with `backup_policy` tag with
 value `daily_two_weeks` are selected and associated with the `plan_id`. 
+
+The `backup-plan.tf` file contains a more complex backup plan which is inspired
+on the [Grandfather-father-son](https://simple.wikipedia.org/wiki/Backup) strategy.
 
 ## Customize notification emails
 
