@@ -113,9 +113,9 @@ and the Lambda function from sending notifications.
 
 ## Auto-tagging resources
 
-The `backup_auto_tagging` lambda function is run every day and inspects the
-infrastructure looking for resources which have no backups enabled (aka. no
-`backup_policy` tag). When such a resource is found the lambda function will:
+The lambda function is run every day and inspects the infrastructure looking for
+resources which have no backups enabled (no `backup_policy` tag). When such a resource
+is found the lambda function will:
 
  * *auto tag it* with `backup_policy: daily_two_weeks`
  * Notify the infrastructure team, as they might want to change the backup
@@ -123,7 +123,8 @@ infrastructure looking for resources which have no backups enabled (aka. no
 
 ## Restoring a backup
 
-The recommended steps for restoring a backup are in the [AWS documentation](https://docs.aws.amazon.com/aws-backup/latest/devguide/restore-resource.html)
+The recommended steps for restoring a backup can be found in the
+[AWS documentation](https://docs.aws.amazon.com/aws-backup/latest/devguide/restore-resource.html)
 
 ## Development
 
