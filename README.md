@@ -107,6 +107,11 @@ containing one of `aws_backup_plan` as values. Any resources that AWS backup can
 manage and were not manually tagged will be notified by the lambda function to
 the operations team.
 
+## Regions
+
+AWS Backup will select resources per-region, this solution needs to be deployed
+multiple times, one for each region where your company is creating resources.
+
 ## Disabling backup
 
 It is possible to disable backups for a specific resource using the tag `backup_policy`
