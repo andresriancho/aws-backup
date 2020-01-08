@@ -57,7 +57,7 @@ resource "null_resource" "put-backup-vault-access-policy" {
   }
 
   provisioner "local-exec" {
-    command = "aws backup put-backup-vault-access-policy --region ${data.aws_region.current.name} --backup-vault-name ${aws_backup_vault.backup_vault.name} --policy file://vault-access-policy.json"
+    command = "aws backup put-backup-vault-access-policy --profile ${var.profile} --region ${data.aws_region.current.name} --backup-vault-name ${aws_backup_vault.backup_vault.name} --policy file://vault-access-policy.json"
   }
   depends_on = ["aws_backup_vault.backup_vault",
   "local_file.vault_access_policy"]
