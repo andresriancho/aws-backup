@@ -115,7 +115,7 @@ resource "aws_backup_plan" "yearly_on_july_first" {
 resource "aws_backup_selection" "daily_except_sunday_selection" {
   plan_id = aws_backup_plan.daily_except_sunday.id
   name = "daily_except_sunday_selection"
-  iam_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/service-role/AWSBackupDefaultServiceRole"
+  iam_role_arn = aws_iam_role.AWSBackupServiceRolePolicyForBackup.arn
 
   selection_tag {
     type = "STRINGEQUALS"
@@ -127,7 +127,7 @@ resource "aws_backup_selection" "daily_except_sunday_selection" {
 resource "aws_backup_selection" "weekly_on_sunday_selection" {
   plan_id = aws_backup_plan.weekly_on_sunday.id
   name = "weekly_on_sunday_selection"
-  iam_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/service-role/AWSBackupDefaultServiceRole"
+  iam_role_arn = aws_iam_role.AWSBackupServiceRolePolicyForBackup.arn
 
   selection_tag {
     type = "STRINGEQUALS"
@@ -139,7 +139,7 @@ resource "aws_backup_selection" "weekly_on_sunday_selection" {
 resource "aws_backup_selection" "monthly_on_first_day_of_month_selection" {
   plan_id = aws_backup_plan.monthly_on_first_day_of_month.id
   name = "monthly_on_first_day_of_month_selection"
-  iam_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/service-role/AWSBackupDefaultServiceRole"
+  iam_role_arn = aws_iam_role.AWSBackupServiceRolePolicyForBackup.arn
 
   selection_tag {
     type = "STRINGEQUALS"
@@ -151,7 +151,7 @@ resource "aws_backup_selection" "monthly_on_first_day_of_month_selection" {
 resource "aws_backup_selection" "yearly_on_july_first_selection" {
   plan_id = aws_backup_plan.yearly_on_july_first.id
   name = "yearly_on_july_first_selection"
-  iam_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/service-role/AWSBackupDefaultServiceRole"
+  iam_role_arn = aws_iam_role.AWSBackupServiceRolePolicyForBackup.arn
 
   selection_tag {
     type = "STRINGEQUALS"
