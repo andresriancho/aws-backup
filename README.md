@@ -5,7 +5,7 @@ best practices in mind.
 The following services are supported:
  * RDS
  * EBS
- * EBS
+ * EFS
  * DynamoDB
 
 ## Workflow
